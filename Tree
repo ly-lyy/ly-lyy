@@ -1,0 +1,263 @@
+#include<iostream> 
+#include<fstream> 
+#include<stdlib.h> 
+using namespace std;
+typedef char TElemType;
+#define MaxSize 1000 
+int i;
+typedef struct BiTNode
+{
+	TElemType date;
+	struct BiTNode *lchild, *rchild;
+}BiTNode, *BiTree;
+void Destory(BiTree &T);// 函数声明
+char input[255];
+void Interface();
+void sjecs(BiTree &T);
+void jp(BiTree &T);// 键盘
+void wj(BiTree &T);// 文件
+void CreateBiTree(BiTree &T);
+int Count(BiTree T);
+int Deep(BiTree T);
+void PreOrderTraverse(BiTree T);// 先序
+void InOrderTraver(BiTree T);// 中序
+void PostOrderTraver(BiTree T);// 后序
+void ccbl(BiTNode *b);// 层次遍历
+void blxljm();
+void locate(BiTree T, char x);
+void main()// 主函数
+{
+	Interface();
+	BiTree T = NULL;
+	bool End = false;
+	char sel;
+    char x;
+	int p = 1;
+	int q = 1;
+	do {
+		Interface();
+		fflush(stdin);
+		char select = cin.get();
+		system("cls");
+		switch (select)
+		{
+		case'1':cout << " 创建二叉树： \n"; sjecs(T); break;
+		case'2': {
+			cout << "\n\t 遍历序列 \n";
+			do {
+				blxljm(); cout << "\n 选择： ";
+				fflush(stdin);
+				sel = cin.get();
+				p = 1;
+				switch (sel)
+				{
+				case'1':cout <<"\n 先序遍历二叉树的输出顺序:\n";PreOrderTraverse(T);cout<<"\n";system("pause");system("cls");break;
+				case'2':cout <<"\n 中序遍历二叉树的输出顺序:\n";InOrderTraver(T);cout<<"\n";system("pause");system("cls");break;
+				case'3':cout <<"\n 后序遍历二叉树的输出顺序:\n";PostOrderTraver(T);cout<<"\n";system("pause");system("cls");break
+					;
+				case'4': cout <<"\n 层次遍历二叉树的输出顺序：\n";ccbl(T); cout << "\n"; system("pause"); system("cls"); break;
+				case'5': p = 0;
+				}
+			} while (p);
+			break; }
+		case'3': { do {
+			system("cls"); q = 1;
+	
+				cout << "\n---------------------结点的孩子信息:--------------\n"; 
+				cout << "（如果节点不存在 , 不返回任何信息，按任意键返回子菜单)\n";
+			cout << " 输入要查找的节点： ";
+			cin >> x;
+			locate(T, x); system("pause"); system("cls");
+			cout << "\n----------- 菜单信息： -----------\n";
+			cout << "\n\t0. 输入返回主菜单 \n"; cout << "\t1. 继续查找节点 \n";
+			do {
+				cout << "\t 请选择： "; cin >> q;
+				if (q != 0 && q != 1) cout << " 输入格式不对请重新输入 \n";
+			} while (q != 0 && q != 1);
+		} while (q);
+		break; }
+		case'4':End = true;
+		}system("pause");
+	} while (!End);
+}
+void locate(BiTree T, char x) // 在二叉树 T 中查找值为 x 的节点
+{
+	BiTree p;
+	p = T;
+	if (T == NULL) return;
+	else if (T->date == x)
+	{
+		cout << p->date;
+		if (T->lchild) {
+			cout << "\t" << "节点的左孩子:"<<T->lchild->date<<"\n";} 
+		else { cout << "\t" << "节点没有左孩子 \n"; }
+		if (T->rchild) {
+			cout << "\t"<< "节点的右孩子:"<<T->rchild->date<<"\n"; } 
+		else { cout << "\t" << "节点没有右孩子 \n"; }
+		}
+		else {
+			p = T->lchild;
+				if (p) {
+					locate(T->lchild, x);
+					locate(T->rchild, x);
+				}
+		}
+		}
+		void Interface()// 菜单界面函数
+		{
+			system("cls");
+			cout << "\n\t----------- 遍历序列 ------------\n";
+			cout << "\t\t1. 创建二叉树 \n";
+			cout << "\t\t2. 遍历序列 \n";
+			cout << "\t\t3. 结点的孩子信息 \n";
+			cout << "\t\t4. 退出系统 \n";
+			cout << "\t\t 请选择（ 1~4）：";
+			cout << "\n\t----------------------------\n";
+		}
+		void blxljm()// 遍历序列界面函数
+		{
+			system("cls");
+			cout << "\n\t---------------------- 二叉树-----------------------\n"; 
+				cout << "\t （如果没创建二叉树 , 不返回任何信息，按 5 返回主菜单） \n";
+			cout << "\t\t1. 先序遍历二叉树 \n";
+			cout << "\t\t2. 中序遍历二叉树 \n";
+			cout << "\t\t3. 后序遍历二叉树 \n";
+			cout << "\t\t4. 层次遍历二叉树 \n";
+			cout << "\t\t5. 返回主菜单 \n";
+			cout << "\t\t 请选择（ 1~5）：";
+			cout << "\n\t--------------------------------------------------\n";
+		}
+		int Count(BiTree T)// 计算节点数量
+		{
+			if (T == NULL)return 0;
+			return 1 + Count(T->lchild) + Count(T->rchild);
+		}
+		
+			int Deep(BiTree T)// 计算二叉树的度
+		{
+			if (T == NULL)return 0;
+			int u = Deep(T->lchild);
+			int v = Deep(T->rchild);
+			if (u > v)return (u + 1);
+			return (v + 1);
+		}
+		void sjecs(BiTree &T)// 选择输入模式 , 新建二叉树
+		{
+			bool End = false;
+			if (T) { Destory(T); T = NULL; }
+			cout << " 请选择输入二叉树序列模式：(1：键盘输入 2. 文件输入 3. 返回主菜单)"<<endl; 
+				do {
+					char Selection = cin.get();
+					switch (Selection)
+					{
+					case'1': jp(T); break;
+					case'2':wj(T); break;
+					case'3':End = true;
+					}
+				} while (!End);
+		}
+		void jp(BiTree &T)// 键盘输入
+		{
+			cout << " 输入按先序建立二叉树结点序列 :\t";
+			cout << " 例如:ABD@@E@@CFH@@@GI@J@@@\n";
+			cout << " 输入:";
+			cin >> input;
+			int i = 0;
+			CreateBiTree(T);
+			int num = Count(T);
+			int deep = Deep(T);
+			
+				cout << " 二叉树创建成功！ \n";
+			cout << " 此二叉树共有 " << num << "个结点 \n";
+			cout << " 且该二叉树的深度为： " << deep << " （按 3 返回主菜单界面）\n";
+			cout << " 请输入选项： ";
+		}
+		void wj(BiTree &T)// 文件输入
+		{
+			ifstream fi("a.txt");
+			if (!fi) { cout << " 数据文件不存在！ \n"; exit(0); }
+			fi >> input;
+			int i = 0;
+			CreateBiTree(T);
+			int num = Count(T);
+			int deep = Deep(T);
+			cout << " 二叉树创建成功！ \n";
+			cout << " 此二叉树共有 " << num << "个结点 \n";
+			cout << " 且该二叉树的深度为： " << deep << " （按 3 返回主菜单界面）\n";
+			cout << " 请输入选项： ";
+		}
+		void CreateBiTree(BiTree &T)// 新建树
+		{
+			if (input[i] == '@')
+			{
+				i++; T = NULL;
+			}
+			else
+			{
+				T = new BiTNode;
+				if (!T)return;
+				T->date = input[i++];
+				CreateBiTree(T->lchild);
+				CreateBiTree(T->rchild);
+			}
+		}
+		void PreOrderTraverse(BiTree T)// 先序遍历
+		{
+			
+				if (T)
+				{
+					cout << T->date;
+					PreOrderTraverse(T->lchild);
+					PreOrderTraverse(T->rchild);
+				}
+		}
+		void InOrderTraver(BiTree T)// 中序遍历
+		{
+			if (T)
+			{
+				InOrderTraver(T->lchild);
+				cout << T->date;
+				InOrderTraver(T->rchild);
+			}
+		}
+		void PostOrderTraver(BiTree T)// 后序遍历
+		{
+			if (T)
+			{
+				PostOrderTraver(T->lchild);
+				PostOrderTraver(T->rchild);
+				cout << T->date;
+			}
+		}
+		void ccbl(BiTNode *b) // 层次遍历
+		{
+			BiTNode *p;
+			BiTNode *q[MaxSize];
+			int qm, h;
+			qm = h = -1; h++; q[h] = b;
+			while (qm != h)
+			{
+				qm = (qm + 1) % MaxSize;
+					p = q[qm];
+				printf("%c ", p->date);
+				if (p->lchild != NULL)
+				{
+					h = (h + 1) % MaxSize;
+					q[h] = p->lchild;
+				}
+				if (p->rchild != NULL)
+				{
+					h = (h + 1) % MaxSize;
+					q[h] = p->rchild;
+				}
+			}
+		}
+		void Destory(BiTree &T)// 删除树
+		{
+			if (T) {
+				Destory(T->lchild);
+				Destory(T->rchild);
+				free(T);
+			}
+		}
+© 2020 GitHub, Inc.
