@@ -1,0 +1,319 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#define maxsize 4
+#define size 61
+using namespace std;
+typedef struct
+{
+    char time[size];//时间
+    char matter[size];//事件
+    char name[size];//报警人
+    char telephone[size];//报警电话
+}Policeinfo;
+typedef struct Lnode
+{
+    struct Lnode *next;
+    Policeinfo data;
+}Lnode,*Linklist;
+void Insert(Linklist &L,Linklist p)//链表的插入
+{
+    Linklist p1,p2;
+    p1=L;
+    p2=p1->next;
+    while(p2!=NULL&&(strcmp(p2->data.time,p->data.time)<0))
+    {
+        p1=p2;
+        p2=p2->next;
+    }
+    p1->next=p;
+    p->next=p2;
+}
+Linklist Find(Linklist L,char time[size],char telephone[size])//链表的查找
+{
+    Linklist p;
+    p=L->next;
+    while(p!=NULL)
+    {
+        if(strcmp(p->data.time,time)==0&&strcmp(p->data.telephone,telephone)==0) break;
+        else  p=p->next;
+    }
+    return p;
+}
+int Delete(Linklist &L,Linklist &r,char time[size],char telephone[size])//链表的删除（从La中删除，记录到Lb中去）
+{
+    Linklist p,q;
+    p=Find(L,time,telephone);
+    if(p==NULL)
+    {
+        return 0;
+    }
+    else
+    {
+        q=L;
+        while(q!=NULL&&q->next!=p)
+        {
+            q=q->next;
+        }
+        q->next=p->next;
+        r=p;
+        return 1;
+    }
+}
+void Display(Linklist L)//显示功能
+{
+    Linklist p;
+    p=L->next;
+    if(p==NULL)
+    {
+        printf("没有信息");
+        return;
+    }
+    else
+    {
+        while(p!=NULL)
+        {
+            printf("-----报警时间:%s   报警人:%s   报警电话:%s   事件内容:%s\n",p->data.time,p->data.name,p->data.telephone,p->data.matter);
+            p=p->next;
+        }
+    }
+}
+void Exit()//退出该系统
+{
+    printf("----------感谢您的使用!---------\n");
+}
+void Function()
+{
+    printf("请继续输入需要使用的功能：\n");
+}
+void Search(Linklist &La,Linklist &Lb)//系统的查询功能
+{
+     printf("未处理的警务有:\n");
+     Display(La);
+     printf("\n");
+     printf("已处理的警务有:\n");
+     Display(Lb);
+}
+int Max(Linklist L)//记录结点数量
+{
+    Linklist q;
+    int m=0;
+    q=L->next;
+    while(q!=NULL)
+    {
+        m++;
+        q=q->next;
+    }
+    if(m>=maxsize)
+    {
+        return 1;
+    }
+}
+void Out(Linklist &La,Linklist &Lb)//出警功能
+{
+    int k,t;
+    char time[size],telephone[size];
+    Linklist p;
+    while(1)
+    {
+      printf("请输入选择出警的事件报警时间和报警电话:(时间格式为：年.月.日.时.分,例：2019.01.01.05.47)\n");
+      printf("报警时间:");
+      cin>>time;
+      printf("报警电话:");
+      cin>>telephone;
+      t=Delete(La,p,time,telephone);
+      if(t==0)
+      {
+          printf("没有查找到该事件\n");
+          break;
+      }
+      else
+      {
+          Insert(Lb,p);
+          printf("是否还要进行其他出警？是请按1，否请按0\n");
+          cin>>k;
+          if(k==0)
+          {
+              printf("-----已全部按要求出警-----\n");
+              break;
+          }
+          else if(k==1)continue;
+          else printf("输入异常\n");
+      }
+    }
+}
+void In(Linklist &La)//报警功能
+{
+    int t=0;
+    Linklist s;
+    while(1)
+   {
+     if(Max(La)==1)
+     {
+        printf("待处理警务过多，报警失败，建议立即处理警务\n");
+        break;
+     }
+     else
+     {
+        printf("请依次输入报警时间、报警人、报警电话、事件内容：(时间格式为:年.月.日.时.分,例：2019.01.01.05.47)\n");
+        s=new Lnode;
+        printf("报警时间:");
+        cin>>s->data.time;
+        printf("报警人:");
+        cin>>s->data.name;
+        printf("报警电话:");
+        cin>>s->data.telephone;
+        printf("事件内容:");
+        cin>>s->data.matter;
+        Insert(La,s);
+        printf("是否还要进行其他报警？是请按1，否请按0\n");
+        cin>>t;
+        if(t==0)
+        {
+            printf("-----事件已全部报警成功！\n");
+            printf("当前已接警的事件有：\n");
+            s=La->next;
+            while(s!=NULL)
+            {
+            printf("时间:‘%s’   报警人:‘%s’   报警电话:‘%s’   事件内容:‘%s’\n",s->data.time,s->data.name,s->data.telephone,s->data.matter);
+            s=s->next;
+            }
+            break;
+        }
+        else if(t==1)continue;
+        else
+        {
+            printf("输入异常\n");
+            break;
+        }
+        }
+    }
+}
+int Saveblinklist(Linklist &Lb)
+{
+    FILE *fp;
+    Linklist p;
+    p=Lb->next;//p为已经构建好的链表
+    if ((fp = fopen("b.txt", "ab+")) == NULL)
+    {
+        return -1;
+    }
+    while (p!=NULL)
+    {
+        fprintf(fp,"%s %s %s %s",p->data.time,p->data.name,p->data.telephone,p->data.matter);
+        p=p->next;
+    }
+    fclose(fp);
+    return 1;
+}//把链表存储到文件里
+int Savealinklist(Linklist &La)
+{
+    FILE *fp;
+    Linklist p;
+    p=La->next;//p为已经构建好的链表
+    if ((fp = fopen("a.txt", "ab+")) == NULL)
+    {
+        return -1;
+    }
+    while (p!=NULL)
+    {
+        fprintf(fp,"%s %s %s %s",p->data.time,p->data.name,p->data.telephone,p->data.matter);
+        p=p->next;
+    }
+    fclose(fp);
+    return 1;
+}//把链表存储到文件里
+Linklist createalink(Linklist &La)
+{
+    FILE *fp;
+    Linklist p1,p2;
+    La=new Lnode;
+    La->next=NULL;
+    p1=p2=La;
+    char a[size],b[size],c[size],d[size];
+    if ((fp=fopen("a.txt", "r")) == NULL)
+    {
+        return NULL;
+    }
+    while(fscanf(fp,"%s %s %s %s",a,b,c,d)!=EOF)
+    {
+         p1=new Lnode;
+         strcpy(p1->data.time,a);
+         strcpy(p1->data.name,b);
+         strcpy(p1->data.telephone,c);
+         strcpy(p1->data.matter,d);
+         p2->next=p1;
+         p2=p1;
+    }
+    p2->next=NULL;
+    return La;
+}
+Linklist createblink(Linklist &Lb)
+{
+    FILE *fp;
+    Linklist p1,p2;
+    Lb=new Lnode;
+    Lb->next=NULL;
+    p1=p2=Lb;
+    char a[size],b[size],c[size],d[size];
+    if ((fp=fopen("b.txt", "r")) == NULL)
+    {
+        return NULL;
+    }
+    while(fscanf(fp,"%s %s %s %s",a,b,c,d)!=EOF)
+    {
+         p1=new Lnode;
+         strcpy(p1->data.time,a);
+         strcpy(p1->data.name,b);
+         strcpy(p1->data.telephone,c);
+         strcpy(p1->data.matter,d);
+         p2->next=p1;
+         p2=p1;
+    }
+    p2->next=NULL;
+    return Lb;
+}
+int main ()
+{
+    int n;
+    Linklist La,Lb;
+    createalink(La);
+    createblink(Lb);
+    printf("********************************\n");
+    printf("----欢迎使用实时报警出警系统----\n");
+    printf("-----------报警请按1------------\n");
+    printf("-----------出警请按2------------\n");
+    printf("-----------查询请按3------------\n");
+    printf("-----------退出请按0------------\n");
+    while(1)
+    {
+        scanf("%d",&n);
+        if(n==0)
+        {
+            Savealinklist(La);
+            Saveblinklist(Lb);
+            Exit();
+            break;
+        }
+        else if(n==3)
+        {
+            Search(La,Lb);
+            printf("\n");
+            Function();
+        }
+        else if(n==2)
+        {
+           Out(La,Lb);
+           Function();
+        }
+        else if(n==1)
+        {
+           In(La);
+           Function();
+        }
+    }
+}
+
+
+
+
