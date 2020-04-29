@@ -1,0 +1,24 @@
+#include "pch.h"
+#include "CppUnitTest.h"
+#include <stdio.h>
+#include"../611/text.h"
+using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+
+namespace UnitTest1
+{
+    TEST_CLASS(UnitTest1)
+    {
+    public:
+        TEST_METHOD(TestMethod1)
+        {
+            int num = 10;//题目数量
+            int maxnum = 100;//最大数
+            char symbol[4] = { '+','-','+','-' };//符号种类
+            int diginum = 4;
+            int bracket = 1;//括号标志
+            int decimal = 0;//小数标志
+            int file = 1;//文件输出标志
+            create_outF(num,maxnum,symbol,diginum,bracket,decimal,file);
+        };
+    };
+}
